@@ -7,7 +7,7 @@ Run the following commands:
 ```bash
 pip3 install -r requirement.txt
 cd match_group
-python manager.py makemigrations
-python manager.py migrate
-python manager.py runserver [port]
+python manage.py makemigrations
+python manage.py migrate
+python manage.py runserver [port]
 ```
