@@ -1,4 +1,5 @@
 from email.policy import HTTP
+from django.db.models import Q
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -6,8 +7,8 @@ from rest_framework import status
 from rest_framework import mixins
 from rest_framework import generics
 from rest_framework import viewsets
-from .models import Group, UserGroup, Tag
-from .serializers import GroupSerializer, TagSerializer
+from .models import Group, UserGroup, Tag, Like
+from .serializers import GroupSerializer, TagSerializer, LikeSerializer
 from .pagination import Pagination
 
 
@@ -95,4 +96,26 @@ class GroupUserDetail(APIView):
         user_group.approved = True
         user_group.save()
         return Response(status=status.HTTP_200_OK)
+
+
+class LikeDetail(APIView):
+    def put(self, request):
+        uid_from = request.data['user_id_1']
+        uid_to = request.data['user_id_2']
+        tagId = request.data['tag_id']
+
+        try:
+            rev_like = Like.objects.get(user_id_1=uid_to, user_id_2=uid_from, tag_id=tagId)
+            rev_like.valid = True
+            rev_like.save()
+            return Response(LikeSerializer(rev_like).data, status=status.HTTP_200_OK)
+        except Like.DoesNotExist:
+            try:
+                like = Like.objects.get(user_id_1=uid_from, user_id_2=uid_to, tag_id=tagId)
+            except Like.DoesNotExist:
+                like = Like(user_id_1=uid_from, user_id_2=uid_to, tag_id=tagId)
+                like.save()
+            finally:
+                serializer = LikeSerializer(like, many=False)
+                return Response(serializer.data, status=status.HTTP_200_OK)
     
