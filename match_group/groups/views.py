@@ -1,74 +1,93 @@
 from email.policy import HTTP
+
 from django.db.models import Q
 from django.shortcuts import render
-from rest_framework.views import APIView
+from rest_framework import generics, mixins, status, viewsets
 from rest_framework.response import Response
-from rest_framework import status
-from rest_framework import mixins
-from rest_framework import generics
-from rest_framework import viewsets
-from .models import Group, UserGroup, Tag, Like
-from .serializers import GroupSerializer, TagSerializer, LikeSerializer
+from rest_framework.views import APIView
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView
+
+from .models import Group, Like, Tag, UserGroup
 from .pagination import Pagination
+from .serializers import GroupSerializer, LikeSerializer, TagSerializer
 
 
-class GroupList(APIView):
-    paginator = Pagination
-    def get(self, request):
-        uid = request.GET.get('uid')
-        if uid:
-            print(uid)
-            groupIds = UserGroup.objects.all().filter(user_id=uid).values_list('group_id', flat=True)
-            groups = Group.objects.filter(id__in=groupIds)
-            print(groupIds)
+class GroupList(ListCreateAPIView):
+    # paginator = Pagination
+    queryset = Group.objects.all()
+    serializer_class = GroupSerializer
+    
+    # def get(self, request):
+    #     uid = request.GET.get('uid')
+    #     if uid:
+    #         print(uid)
+    #         groupIds = UserGroup.objects.all().filter(user_id=uid).values_list('group_id', flat=True)
+    #         groups = Group.objects.filter(id__in=groupIds)
+    #         print(groupIds)
             
-            # groups = Group.objects.all()
-        else:
-            groups = Group.objects.all()
-        paginator = Pagination()
-        result_page = paginator.paginate_queryset(groups, request)
-        serializer = GroupSerializer(result_page, many=True)
+    #         # groups = Group.objects.all()
+    #     else:
+    #         groups = Group.objects.all()
+    #     paginator = Pagination()
+    #     result_page = paginator.paginate_queryset(groups, request)
+    #     serializer = GroupSerializer(result_page, many=True)
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    #     return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def post(self, requst):
-        serializer = GroupSerializer(data=requst.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    # def post(self, request):
+    #     serializer = GroupSerializer(data=request.data)
+    #     self_uid = request.headers.get('uid')
+    #     if serializer.is_valid():
+    #         serializer.save(admin_user_id=self_uid)
+    #         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class GroupDetail(APIView):
+class GroupDetail(RetrieveUpdateDestroyAPIView):
+    queryset = Group.objects.all()
+    serializer_class = GroupSerializer
+
+    def patch(self, request, pk):
+        print('patch')
+        return self.partial_update(request, pk)
+        
+        # def get(self, request, pk):
+        #     try:
+        #         group = Group.objects.get(pk=pk)
+        #         serializer = GroupSerializer(group)
+        #         return Response(serializer.data, status=status.HTTP_200_OK)
+        #     except Group.DoesNotExist:
+        #         return Response(status=status.HTTP_404_NOT_FOUND)
     
-        def get(self, request, pk):
-            group = Group.objects.get(pk=pk)
-            serializer = GroupSerializer(group)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+        # def patch(self, request, pk):
+        #     try:
+        #         group = Group.objects.get(pk=pk)
+        #         serializer = GroupSerializer(group, data=request.data)
+        #         if serializer.is_valid():
+        #             serializer.save()
+        #             return Response(serializer.data, status=status.HTTP_200_OK)
+        #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        #     except Group.DoesNotExist:
+        #         return Response(status=status.HTTP_404_NOT_FOUND)
     
-        def patch(self, request, pk):
-            group = Group.objects.get(pk=pk)
-            serializer = GroupSerializer(group, data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-        def delete(self, request, pk):
-            group = Group.objects.get(pk=pk)
-            group.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+        # def delete(self, request, pk):
+        #     group = Group.objects.get(pk=pk)
+        #     group.delete()
+        #     return Response(status=status.HTTP_204_NO_CONTENT)
 
-class GroupTagList(APIView):
-    def get(self, request, gid):
-        tags = Tag.objects.all().filter(group_id=gid)
+class GroupTagList(ListAPIView):
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+
+    def get(self, request, pk):
+        tags = Tag.objects.all().filter(group=pk)
         serializer = TagSerializer(tags, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class GroupUserList(APIView):
     def get(self, request, gid):
-        users = UserGroup.objects.all().filter(group_id=gid, approved=True).values_list('user_id', flat=True)
+        users = UserGroup.objects.all().filter(group_id=gid, admin_approved=True, user_approved=True).values_list('user_id', flat=True)
         paginator = Pagination()
         result_page = paginator.paginate_queryset(users, request)
         # serializer = UserSerializer(users, many=True)
@@ -76,12 +95,25 @@ class GroupUserList(APIView):
 
 
 class GroupUserDetail(APIView):
+    def get(self, request, gid, uid):
+        self_uid = request.headers['uid']
+        likes = Like.objects.all().filter(user_id_from=self_uid, user_id_to=uid, group_id=gid).values_list('tag_id', flat=True)
+        rev_likes = Like.objects.all().filter(user_id_from=uid, user_id_to=self_uid, group_id=gid).values_list('tag_id', flat=True)
+        matches = {}
+        for tag_id in likes:
+            if tag_id in rev_likes:
+                matches[tag_id] = True
+            else:
+                matches[tag_id] = False
+
+        return Response(matches, status=status.HTTP_200_OK)
+
     def post(self, request, gid, uid):
         if not UserGroup.objects.filter(user_id=uid, group_id=gid).exists():
             user_group = UserGroup(user_id=uid, group_id=gid)
             group = Group.objects.get(pk=gid)
             if group.allow_without_approval:
-                user_group.approved = True
+                user_group.admin_approved = True
             user_group.save()
         return Response(status=status.HTTP_200_OK)
     
@@ -91,31 +123,32 @@ class GroupUserDetail(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
     
     def put(self, request, gid, uid):
-        # TODO add admin validation
+        self_uid = request.headers['uid']
+        print(self_uid)
         user_group = UserGroup.objects.get(user_id=uid, group_id=gid)
-        user_group.approved = True
+        group = Group.objects.get(pk=gid)
+        if self_uid == uid:
+            user_group.user_approved = True
+        elif self_uid == group.admin_user_id:
+            user_group.admin_approved = True
         user_group.save()
         return Response(status=status.HTTP_200_OK)
 
 
 class LikeDetail(APIView):
     def put(self, request):
-        uid_from = request.data['user_id_1']
-        uid_to = request.data['user_id_2']
-        tagId = request.data['tag_id']
+        uid_from = request.data['fromUserId']
+        uid_to = request.data['toUserId']
+        newTagIds = request.data['tagIds']
+        groupId = request.data['groupId']
 
-        try:
-            rev_like = Like.objects.get(user_id_1=uid_to, user_id_2=uid_from, tag_id=tagId)
-            rev_like.valid = True
-            rev_like.save()
-            return Response(LikeSerializer(rev_like).data, status=status.HTTP_200_OK)
-        except Like.DoesNotExist:
-            try:
-                like = Like.objects.get(user_id_1=uid_from, user_id_2=uid_to, tag_id=tagId)
-            except Like.DoesNotExist:
-                like = Like(user_id_1=uid_from, user_id_2=uid_to, tag_id=tagId)
-                like.save()
-            finally:
-                serializer = LikeSerializer(like, many=False)
-                return Response(serializer.data, status=status.HTTP_200_OK)
-    
+        oldTagIds = Like.objects.filter(from_user_id=uid_from, to_user_id=uid_to, group_id=groupId).values_list('tag_id', flat=True)
+        createTagIds = list(set(newTagIds) - set(oldTagIds))
+        deleteTagIds = list(set(oldTagIds) - set(newTagIds))
+        for tagId in createTagIds:
+            like = Like(from_user_id=uid_from, to_user_id=uid_to, tag_id=tagId, group_id=groupId)
+            like.save()
+        for tagId in deleteTagIds:
+            like = Like.objects.get(from_user_id=uid_from, to_user_id=uid_to, tag_id=tagId, group_id=groupId)
+            like.delete()
+        return Response(status=status.HTTP_200_OK)

@@ -20,19 +20,20 @@ class Group(TimeInfo):
     
 class Tag(TimeInfo):
     name = models.CharField(max_length=100)
-    group_id = models.IntegerField()
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='tags')
     description = models.CharField(max_length=100)
     icon_id = models.IntegerField()
 
 
 class Like(TimeInfo):
-    user_id_1 = models.IntegerField()
-    user_id_2 = models.IntegerField()
-    tag_id = models.IntegerField()
+    user_id_from = models.IntegerField()
+    user_id_to = models.IntegerField()
+    group = models.ForeignKey(Group, on_delete=models.CASCADE)
+    tag_id = models.ForeignKey(Tag, on_delete=models.CASCADE)
     processed = models.BooleanField(default=False)
-    valid = models.BooleanField(default=False)
 
 class UserGroup(TimeInfo):
     user_id = models.IntegerField()
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
-    approved = models.BooleanField(default=False)
+    user_approved = models.BooleanField(default=False)
+    admin_approved = models.BooleanField(default=False)
