@@ -17,32 +17,6 @@ class GroupList(ListCreateAPIView):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
     
-    # def get(self, request):
-    #     uid = request.GET.get('uid')
-    #     if uid:
-    #         print(uid)
-    #         groupIds = UserGroup.objects.all().filter(user_id=uid).values_list('group_id', flat=True)
-    #         groups = Group.objects.filter(id__in=groupIds)
-    #         print(groupIds)
-            
-    #         # groups = Group.objects.all()
-    #     else:
-    #         groups = Group.objects.all()
-    #     paginator = Pagination()
-    #     result_page = paginator.paginate_queryset(groups, request)
-    #     serializer = GroupSerializer(result_page, many=True)
-
-    #     return Response(serializer.data, status=status.HTTP_200_OK)
-
-    # def post(self, request):
-    #     serializer = GroupSerializer(data=request.data)
-    #     self_uid = request.headers.get('uid')
-    #     if serializer.is_valid():
-    #         serializer.save(admin_user_id=self_uid)
-    #         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
 class GroupDetail(RetrieveUpdateDestroyAPIView):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
@@ -51,29 +25,6 @@ class GroupDetail(RetrieveUpdateDestroyAPIView):
         print('patch')
         return self.partial_update(request, pk)
         
-        # def get(self, request, pk):
-        #     try:
-        #         group = Group.objects.get(pk=pk)
-        #         serializer = GroupSerializer(group)
-        #         return Response(serializer.data, status=status.HTTP_200_OK)
-        #     except Group.DoesNotExist:
-        #         return Response(status=status.HTTP_404_NOT_FOUND)
-    
-        # def patch(self, request, pk):
-        #     try:
-        #         group = Group.objects.get(pk=pk)
-        #         serializer = GroupSerializer(group, data=request.data)
-        #         if serializer.is_valid():
-        #             serializer.save()
-        #             return Response(serializer.data, status=status.HTTP_200_OK)
-        #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        #     except Group.DoesNotExist:
-        #         return Response(status=status.HTTP_404_NOT_FOUND)
-    
-        # def delete(self, request, pk):
-        #     group = Group.objects.get(pk=pk)
-        #     group.delete()
-        #     return Response(status=status.HTTP_204_NO_CONTENT)
 
 class GroupTagList(ListAPIView):
     queryset = Tag.objects.all()
