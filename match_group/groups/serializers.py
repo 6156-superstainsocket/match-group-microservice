@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Group, Tag, Like
+from .models import Group, Tag, Like, UserGroup
 from drf_writable_nested.serializers import WritableNestedModelSerializer
 
 READ_ONLY_FIELDS = ('id', 'created_at', 'updated_at', 'deleted_at')
@@ -23,4 +23,10 @@ class LikeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Like
         fields = '__all__'
+        read_only_fields = READ_ONLY_FIELDS
+
+class UserGroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserGroup
+        fields = ['user_id']
         read_only_fields = READ_ONLY_FIELDS

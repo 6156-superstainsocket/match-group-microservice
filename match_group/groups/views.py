@@ -9,7 +9,7 @@ from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIV
 
 from .models import Group, Like, Tag, UserGroup
 from .pagination import Pagination
-from .serializers import GroupSerializer, LikeSerializer, TagSerializer
+from .serializers import GroupSerializer, LikeSerializer, TagSerializer, UserGroupSerializer
 
 
 class GroupList(ListCreateAPIView):
@@ -17,29 +17,28 @@ class GroupList(ListCreateAPIView):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
     
+# TODO: on cascade delete not working
 class GroupDetail(RetrieveUpdateDestroyAPIView):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
 
     def patch(self, request, pk):
-        print('patch')
         return self.partial_update(request, pk)
         
 
 class GroupTagList(ListAPIView):
-    queryset = Tag.objects.all()
     serializer_class = TagSerializer
 
-    def get(self, request, pk):
-        tags = Tag.objects.all().filter(group=pk)
-        serializer = TagSerializer(tags, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    def get_queryset(self):
+        return Tag.objects.all().filter(group=self.kwargs['pk'])
 
 
-class GroupUserList(APIView):
+class GroupUserList(ListAPIView):
+    queryset = UserGroup.objects.all()
+    serializer_class = UserGroupSerializer
     def get(self, request, gid):
         users = UserGroup.objects.all().filter(group_id=gid, admin_approved=True, user_approved=True).values_list('user_id', flat=True)
-        paginator = Pagination()
+        # paginator = Pagination()
         result_page = paginator.paginate_queryset(users, request)
         # serializer = UserSerializer(users, many=True)
         return Response(result_page, status=status.HTTP_200_OK)
