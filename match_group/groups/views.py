@@ -8,7 +8,6 @@ from rest_framework.views import APIView
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView
 
 from .models import Group, Like, Tag, UserGroup
-from .pagination import Pagination
 from .serializers import GroupSerializer, LikeSerializer, TagSerializer, UserGroupSerializer
 
 
