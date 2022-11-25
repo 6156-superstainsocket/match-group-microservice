@@ -29,7 +29,7 @@ SECRET_KEY = "django-insecure-pbiddu0o+@0but7l_^3(^d7(@$_d&600e++58bgah8qti@g5x-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['match-group-microservice-dev.us-east-1.elasticbeanstalk.com']
 
 
 # Application definition
@@ -47,6 +47,10 @@ INSTALLED_APPS = [
     "safedelete",
     "django_filters",
 ]
+
+STATIC_URL = '/static/'
+STATIC_ROOT = 'static'
+
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
