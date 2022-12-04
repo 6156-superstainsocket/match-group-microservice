@@ -9,7 +9,7 @@ drf-spectacular==0.24.2
 drf-writable-nested==0.7.0
 inflection==0.5.1
 jsonschema==4.17.1
-psycopg2==2.9.5
+psycopg2-binary==2.9.5
 pyrsistent==0.19.2
 pytz==2022.6
 PyYAML==6.0
