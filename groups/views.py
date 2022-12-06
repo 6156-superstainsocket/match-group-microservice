@@ -14,6 +14,8 @@ class GroupList(ListCreateAPIView):
     serializer_class = GroupSerializer
     
 # TODO: on cascade delete not working
+# TODO: add user to the group when create
+# TODO: add default tag when create
 class GroupDetail(RetrieveUpdateDestroyAPIView):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
@@ -32,13 +34,10 @@ class GroupTagList(ListAPIView):
 class GroupUserList(ListAPIView):
     queryset = UserGroup.objects.all()
     serializer_class = UserGroupSerializer
-    def get(self, request, gid):
-        users = UserGroup.objects.all().filter(group_id=gid, admin_approved=True, user_approved=True).values_list('user_id', flat=True)
-        # paginator = Pagination()
-        result_page = paginator.paginate_queryset(users, request)
-        # serializer = UserSerializer(users, many=True)
-        return Response(result_page, status=status.HTTP_200_OK)
 
+    def get_queryset(self):
+        return UserGroup.objects.all().filter(group_id=self.kwargs['gid'], admin_approved=True, user_approved=True)
+        
 
 class GroupUserDetail(APIView):
     def get(self, request, gid, uid):
