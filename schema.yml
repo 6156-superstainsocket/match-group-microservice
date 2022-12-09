@@ -119,7 +119,11 @@ paths:
       - {}
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserGroup'
+          description: ''
     post:
       operationId: groups_users_create
       parameters:
@@ -137,13 +141,29 @@ paths:
         required: true
       tags:
       - groups
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserGroup'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserGroup'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserGroup'
+        required: true
       security:
       - cookieAuth: []
       - basicAuth: []
       - {}
       responses:
-        '200':
-          description: No response body
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserGroup'
+          description: ''
     put:
       operationId: groups_users_update
       parameters:
@@ -161,13 +181,29 @@ paths:
         required: true
       tags:
       - groups
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserGroup'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserGroup'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserGroup'
+        required: true
       security:
       - cookieAuth: []
       - basicAuth: []
       - {}
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserGroup'
+          description: ''
     delete:
       operationId: groups_users_destroy
       parameters:
@@ -364,6 +400,8 @@ components:
           maxLength: 100
         icon_id:
           type: integer
+          maximum: 2147483647
+          minimum: -2147483648
         allow_without_approval:
           type: boolean
         tags:
@@ -372,6 +410,8 @@ components:
             $ref: '#/components/schemas/PatchedTag'
         admin_user_id:
           type: integer
+          maximum: 2147483647
+          minimum: -2147483648
       required:
       - admin_user_id
       - description
@@ -454,6 +494,8 @@ components:
           maxLength: 100
         icon_id:
           type: integer
+          maximum: 2147483647
+          minimum: -2147483648
         allow_without_approval:
           type: boolean
         tags:
@@ -462,6 +504,8 @@ components:
             $ref: '#/components/schemas/PatchedTag'
         admin_user_id:
           type: integer
+          maximum: 2147483647
+          minimum: -2147483648
     PatchedTag:
       type: object
       description: Adds nested create feature
@@ -477,6 +521,8 @@ components:
           maxLength: 100
         icon_id:
           type: integer
+          maximum: 2147483647
+          minimum: -2147483648
     Tag:
       type: object
       description: Adds nested create feature
@@ -492,6 +538,8 @@ components:
           maxLength: 100
         icon_id:
           type: integer
+          maximum: 2147483647
+          minimum: -2147483648
       required:
       - description
       - icon_id
@@ -500,10 +548,18 @@ components:
     UserGroup:
       type: object
       properties:
-        user_id:
+        user:
+          type: string
+          readOnly: true
+        user_approved:
+          type: boolean
+        admin_approved:
+          type: boolean
+        group:
           type: integer
       required:
-      - user_id
+      - group
+      - user
   securitySchemes:
     basicAuth:
       type: http

@@ -29,8 +29,17 @@ class Like(TimeInfo):
     tag_id = models.ForeignKey(Tag, on_delete=models.CASCADE)
     processed = models.BooleanField(default=False)
 
+
 class UserGroup(TimeInfo):
     user_id = models.IntegerField()
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
     user_approved = models.BooleanField(default=False)
     admin_approved = models.BooleanField(default=False)
+
+    @property
+    def uid(self):
+        return self.user_id
+    
+    @property
+    def gid(self):
+        return self.group.id
