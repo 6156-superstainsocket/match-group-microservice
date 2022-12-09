@@ -4,6 +4,7 @@ from rest_framework import generics, mixins, status, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView, CreateAPIView
+from rest_framework import permissions
 
 from .models import Group, Like, Tag, UserGroup
 from .serializers import GroupSerializer, LikeSerializer, TagSerializer, UserGroupSerializer
@@ -17,6 +18,7 @@ class GroupList(ListCreateAPIView):
 # TODO: add user to the group when create
 # TODO: add default tag when create
 class GroupDetail(RetrieveUpdateDestroyAPIView):
+    permission_classes = [permissions.IsAuthenticated]
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
 
@@ -25,6 +27,7 @@ class GroupDetail(RetrieveUpdateDestroyAPIView):
         
 
 class GroupTagList(ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
     serializer_class = TagSerializer
 
     def get_queryset(self):
