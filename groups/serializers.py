@@ -41,9 +41,10 @@ class UserGroupSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = UserGroup
-        fields = ['user']
+        fields = ['user', 'user_approved', 'admin_approved', 'group'] # TODO: post return value is not correct
         read_only_fields = READ_ONLY_FIELDS
 
+    
     def get_user(self, obj):
         user_json = '''
         {
@@ -56,3 +57,9 @@ class UserGroupSerializer(serializers.ModelSerializer):
         data = JSONParser().parse(io.BytesIO(user_json.encode()))
         data['id'] = obj.user_id
         return UserSerializer(data=data).initial_data
+    
+class LikeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Like
+        fields = '__all__'
+        read_only_fields = READ_ONLY_FIELDS
