@@ -9,14 +9,18 @@ from rest_framework import permissions
 from .models import Group, Like, Tag, UserGroup
 from .serializers import GroupSerializer, LikeSerializer, TagSerializer, UserGroupSerializer
 
-
+# TODO: add default tag when create
 class GroupList(ListCreateAPIView):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(admin_user_id=self.request.user.id)
+        group = Group.objects.get(pk=serializer.data['id'])
+        UserGroup.objects.create(user_id=self.request.user.id, group=group, admin_approved=True, user_approved=True)
     
 # TODO: on cascade delete not working
-# TODO: add user to the group when create
-# TODO: add default tag when create
+
 class GroupDetail(RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
     queryset = Group.objects.all()
@@ -42,7 +46,8 @@ class GroupUserList(ListAPIView):
         return UserGroup.objects.all().filter(group_id=self.kwargs['gid'], admin_approved=True, user_approved=True)
         
 
-# # TODO: detele user from group permission check
+# TODO: detele user from group permission check
+
 class GroupUserDetail(RetrieveUpdateDestroyAPIView, CreateAPIView):
     queryset = UserGroup.objects.all()
     serializer_class = UserGroupSerializer
@@ -51,6 +56,7 @@ class GroupUserDetail(RetrieveUpdateDestroyAPIView, CreateAPIView):
 
     def get_object(self):
         return get_object_or_404(UserGroup, user_id=self.kwargs['uid'], group_id=self.kwargs['gid'])
+
 
     def perform_create(self, serializer):
         group = serializer.group

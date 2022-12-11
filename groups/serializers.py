@@ -16,10 +16,11 @@ class TagSerializer(WritableNestedModelSerializer):
 
 class GroupSerializer(WritableNestedModelSerializer):
     tags = TagSerializer(many=True, partial=True)
+   
     class Meta:
         model = Group
         fields = ['id', 'name', 'description', 'icon_id', 'allow_without_approval', 'tags', 'admin_user_id']
-        read_only_fields = READ_ONLY_FIELDS
+        read_only_fields = READ_ONLY_FIELDS + ('admin_user_id',)
     
 
 class LikeSerializer(serializers.ModelSerializer):
