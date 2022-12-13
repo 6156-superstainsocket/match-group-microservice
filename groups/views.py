@@ -11,6 +11,7 @@ from .models import Group, Like, Tag, UserGroup
 from .serializers import GroupSerializer, LikeSerializer, TagSerializer, UserGroupSerializer, TagBatchSerializer
 
 # TODO: add default tag when create
+# TODO: filter group by user id
 class GroupList(ListCreateAPIView):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer

@@ -1,0 +1,51 @@
+[
+    {
+        "model": "groups.group",
+        "pk": 0,
+        "fields": {
+            "created_at": "2022-12-06T00:05:42.219Z",
+            "updated_at": "2022-12-06T01:25:18.427Z",
+            "description": "default",
+            "name": "default",
+            "admin_user_id": 0,
+            "icon_id": 1,
+            "allow_without_approval": false
+        }
+    },
+    {
+        "model": "groups.tag",
+        "pk": 1,
+        "fields": {
+            "created_at": "2022-12-11T05:59:36.953Z",
+            "updated_at": "2022-12-11T05:59:36.953Z",
+            "name": "default dating",
+            "group": 0,
+            "description": "of course we need dating",
+            "icon_id": 1
+        }
+    },
+    {
+        "model": "groups.tag",
+        "pk": 2,
+        "fields": {
+            "created_at": "2022-12-11T05:59:36.953Z",
+            "updated_at": "2022-12-11T05:59:36.953Z",
+            "name": "default food",
+            "group": 0,
+            "description": "halal food truck is better",
+            "icon_id": 1
+        }
+    },
+    {
+        "model": "groups.tag",
+        "pk": 3,
+        "fields": {
+            "created_at": "2022-12-11T05:59:36.953Z",
+            "updated_at": "2022-12-11T05:59:36.953Z",
+            "name": "default study",
+            "group": 0,
+            "description": "how many libraries do we have?",
+            "icon_id": 1
+        }
+    }
+]
