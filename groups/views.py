@@ -5,9 +5,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView, CreateAPIView
 from rest_framework import permissions
+from drf_spectacular.utils import extend_schema
 
 from .models import Group, Like, Tag, UserGroup
-from .serializers import GroupSerializer, LikeSerializer, TagSerializer, UserGroupSerializer
+from .serializers import GroupSerializer, LikeSerializer, TagSerializer, UserGroupSerializer, TagBatchSerializer
 
 # TODO: add default tag when create
 class GroupList(ListCreateAPIView):
@@ -120,3 +121,18 @@ class LikeDetail(APIView):
             like = Like.objects.get(from_user_id=uid_from, to_user_id=uid_to, tag_id=tagId, group_id=groupId)
             like.delete()
         return Response(status=status.HTTP_200_OK)
+
+
+class TagBatch(APIView):
+    serializer_class = TagSerializer
+
+    @extend_schema(
+        request=TagBatchSerializer,
+        responses=TagSerializer(many=True)
+    )
+
+    def post(self, request):
+        ids = request.data['id']
+        tags = Tag.objects.filter(id__in=ids)
+        serializer = self.serializer_class(tags, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

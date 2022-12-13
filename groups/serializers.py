@@ -13,6 +13,8 @@ class TagSerializer(WritableNestedModelSerializer):
         fields = ['id', 'name', 'description', 'icon_id']
         read_only_fields = READ_ONLY_FIELDS
 
+class TagBatchSerializer(serializers.Serializer):
+    id = serializers.ListField(child=serializers.IntegerField())
 
 class GroupSerializer(WritableNestedModelSerializer):
     tags = TagSerializer(many=True, partial=True)

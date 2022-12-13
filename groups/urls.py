@@ -11,6 +11,8 @@ urlpatterns = [
     re_path(r'^groups/(?P<gid>[0-9]+)/users$', views.GroupUserList.as_view()),
     re_path(r'^groups/(?P<gid>[0-9]+)/users/(?P<uid>[0-9]+)$', views.GroupUserDetail.as_view()),
 
+    re_path(r'^tags/batch$', views.TagBatch.as_view()),
+
     re_path(r'^likes/$', views.LikeDetail.as_view()),
 ]
 
