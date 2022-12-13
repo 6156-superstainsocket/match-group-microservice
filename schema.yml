@@ -23,8 +23,7 @@ paths:
       tags:
       - groups
       security:
-      - cookieAuth: []
-      - basicAuth: []
+      - jwtAuth: []
       - {}
       responses:
         '200':
@@ -50,8 +49,7 @@ paths:
               $ref: '#/components/schemas/Group'
         required: true
       security:
-      - cookieAuth: []
-      - basicAuth: []
+      - jwtAuth: []
       - {}
       responses:
         '201':
@@ -85,8 +83,7 @@ paths:
       tags:
       - groups
       security:
-      - cookieAuth: []
-      - basicAuth: []
+      - jwtAuth: []
       - {}
       responses:
         '200':
@@ -114,8 +111,7 @@ paths:
       tags:
       - groups
       security:
-      - cookieAuth: []
-      - basicAuth: []
+      - jwtAuth: []
       - {}
       responses:
         '200':
@@ -154,8 +150,7 @@ paths:
               $ref: '#/components/schemas/UserGroup'
         required: true
       security:
-      - cookieAuth: []
-      - basicAuth: []
+      - jwtAuth: []
       - {}
       responses:
         '201':
@@ -194,8 +189,7 @@ paths:
               $ref: '#/components/schemas/UserGroup'
         required: true
       security:
-      - cookieAuth: []
-      - basicAuth: []
+      - jwtAuth: []
       - {}
       responses:
         '200':
@@ -222,8 +216,7 @@ paths:
       tags:
       - groups
       security:
-      - cookieAuth: []
-      - basicAuth: []
+      - jwtAuth: []
       - {}
       responses:
         '204':
@@ -241,9 +234,7 @@ paths:
       tags:
       - groups
       security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
+      - jwtAuth: []
       responses:
         '200':
           content:
@@ -275,9 +266,7 @@ paths:
               $ref: '#/components/schemas/Group'
         required: true
       security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
+      - jwtAuth: []
       responses:
         '200':
           content:
@@ -308,9 +297,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedGroup'
       security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
+      - jwtAuth: []
       responses:
         '200':
           content:
@@ -330,9 +317,7 @@ paths:
       tags:
       - groups
       security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
+      - jwtAuth: []
       responses:
         '204':
           description: No response body
@@ -361,9 +346,7 @@ paths:
       tags:
       - groups
       security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
+      - jwtAuth: []
       responses:
         '200':
           content:
@@ -377,12 +360,40 @@ paths:
       tags:
       - likes
       security:
-      - cookieAuth: []
-      - basicAuth: []
+      - jwtAuth: []
       - {}
       responses:
         '200':
           description: No response body
+  /api/tags/batch:
+    post:
+      operationId: tags_batch_create
+      tags:
+      - tags
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TagBatch'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TagBatch'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TagBatch'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tag'
+          description: ''
 components:
   schemas:
     Group:
@@ -410,8 +421,7 @@ components:
             $ref: '#/components/schemas/PatchedTag'
         admin_user_id:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          readOnly: true
       required:
       - admin_user_id
       - description
@@ -504,8 +514,7 @@ components:
             $ref: '#/components/schemas/PatchedTag'
         admin_user_id:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          readOnly: true
     PatchedTag:
       type: object
       description: Adds nested create feature
@@ -545,6 +554,15 @@ components:
       - icon_id
       - id
       - name
+    TagBatch:
+      type: object
+      properties:
+        id:
+          type: array
+          items:
+            type: integer
+      required:
+      - id
     UserGroup:
       type: object
       properties:
@@ -561,10 +579,7 @@ components:
       - group
       - user
   securitySchemes:
-    basicAuth:
+    jwtAuth:
       type: http
-      scheme: basic
-    cookieAuth:
-      type: apiKey
-      in: cookie
-      name: sessionid
+      scheme: bearer
+      bearerFormat: JWT
