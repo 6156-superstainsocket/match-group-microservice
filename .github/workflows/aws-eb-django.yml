@@ -22,7 +22,7 @@ jobs:
         aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         application_name: match-group-microservice
         environment_name: match-group-microservice-dev
-        version_label: ${{ steps.date.outputs.date }}
+        version_label: ${{ steps.date.outputs.time }}
         region: us-east-1
         deployment_package: deploy.zip
         version_description: ${{ github.event.head_commit.message }}
