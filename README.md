@@ -1,5 +1,5 @@
 # match-group-microservice
-This repo is for CU E6156 course project. The group microservice is responded to the main 
+This repo is for CU E6156 Fall 2022 course project. The group microservice is responded to the main 
 logic of activities inside groups.
 
 ## configuration
