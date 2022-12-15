@@ -37,3 +37,14 @@ python3 manage.py migrate
 python3 manage.py loaddata groups/fixtures/initial_data.json
 python3 manage.py runserver 0.0.0.0:9999
 ```
+
+## documentation
+
+### generate schema
+`./manage.py spectacular --file schema.yml`
+
+### doc path
+```
+api/schema/swagger-ui/
+api/schema/redoc/
+```
