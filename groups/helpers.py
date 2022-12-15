@@ -1,8 +1,24 @@
+from .models import Like, Tag
+from .serializers import TagSerializer
 import environ
 import requests
 
 env = environ.Env()
 environ.Env.read_env()
+
+
+def get_tags_json(user_from_id, user_to_id, gid):
+    likes_tags = Like.objects.all().filter(user_id_from=user_from_id, user_id_to=user_to_id, group_id=gid).values_list('tag_id', flat=True)
+    rev_likes_tags = Like.objects.all().filter(user_id_from=user_to_id, user_id_to=user_from_id, group_id=gid).values_list('tag_id', flat=True)
+    matches_tags_ids = [id for id in likes_tags if id in rev_likes_tags]
+
+    tags = Tag.objects.all().filter(group_id=gid)
+    tags_json = TagSerializer(tags, many=True).data
+    for tag in tags_json:
+        tag['is_match'] = True if tag['id'] in matches_tags_ids else False
+    return tags_json
+
+
 
 def send_invitation_message(group, user_from_id, user_to_id):
     user_service = env('USER_SERVICE')

@@ -26,7 +26,7 @@ class Like(TimeInfo):
     user_id_from = models.IntegerField()
     user_id_to = models.IntegerField()
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
-    tag_id = models.ForeignKey(Tag, on_delete=models.CASCADE)
+    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
     processed = models.BooleanField(default=False)
 
 

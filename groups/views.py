@@ -9,7 +9,7 @@ from drf_spectacular.utils import extend_schema
 
 from .models import Group, Like, Tag, UserGroup
 from .serializers import GroupSerializer, LikeSerializer, TagSerializer, UserGroupSerializer, TagBatchSerializer
-from .helpers import send_invitation_message
+from .helpers import send_invitation_message, get_tags_json
 
 class GroupList(ListCreateAPIView):
     queryset = Group.objects.all()
@@ -56,6 +56,14 @@ class GroupUserList(ListAPIView):
 
     def get_queryset(self):
         return UserGroup.objects.all().filter(group_id=self.kwargs['gid'], admin_approved=True, user_approved=True)
+    
+    def list(self, request, *args, **kwargs):
+        rsp = super().list(request, *args, **kwargs)
+        print(rsp.data)
+        items = rsp.data['results']
+        for item in items:
+            item['tags'] = get_tags_json(request.user.id, item['user']['id'], item['group'])
+        return rsp
         
 
 # TODO: detele user from group permission check
@@ -91,20 +99,12 @@ class GroupUserDetail(RetrieveUpdateDestroyAPIView, CreateAPIView):
 
     # get user info in group
     def get(self, request, gid, uid):
-        self_uid = request.user.id
-        user = get_object_or_404(UserGroup, user_id=uid, group_id=gid, admin_approved=True, user_approved=True)
-        serializer = self.get_serializer(user)
-        uid = user.id
+        user_group = get_object_or_404(UserGroup, user_id=uid, group_id=gid, admin_approved=True, user_approved=True)
+        serializer = self.get_serializer(user_group)
 
-        likes = Like.objects.all().filter(user_id_from=self_uid, user_id_to=uid, group_id=gid).values_list('tag_id', flat=True)
-        rev_likes = Like.objects.all().filter(user_id_from=uid, user_id_to=self_uid, group_id=gid).values_list('tag_id', flat=True)
-        matches = [id for id in likes if id in rev_likes]
+        tags_json = get_tags_json(request.user.id, uid, gid)
 
         rsp_data = serializer.data
-        tags = Tag.objects.all().filter(group_id=gid)
-        tags_json = TagSerializer(tags, many=True).data
-        for tag in tags_json:
-            tag['is_match'] = True if tag['id'] in matches else False
         rsp_data['tags'] = tags_json
         return Response(rsp_data, status=status.HTTP_200_OK)
 
