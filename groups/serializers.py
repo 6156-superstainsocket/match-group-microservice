@@ -59,7 +59,11 @@ class UserGroupSerializer(serializers.ModelSerializer):
         user_service = env('USER_SERVICE')
         get_user_path = env('GET_USER_PATH')
         user_url_base = f'{user_service}{get_user_path}/'
-        user_json = requests.get(f'{user_url_base}{obj.user_id}').json()['profile']
+        user = requests.get(f'{user_url_base}{obj.user_id}')
+        if user.status_code == 200:
+            user_json = requests.get(f'{user_url_base}{obj.user_id}').json()['profile']
+        else:
+            user_json = {'userNotExist': True}
         
         return UserSerializer(data=user_json).initial_data
     
