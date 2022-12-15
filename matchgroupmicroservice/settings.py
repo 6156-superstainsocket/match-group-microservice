@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
-from datetime import timedelta
+# from datetime import timedelta
 
 import environ
 env = environ.Env()
@@ -50,7 +50,7 @@ INSTALLED_APPS = [
 ]
 
 SIMPLE_JWT = {
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    # 'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
     # 'ROTATE_REFRESH_TOKENS': True,
     'SIGNING_KEY': env('SIGNING_KEY'),
 }

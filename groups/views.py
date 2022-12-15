@@ -1,6 +1,6 @@
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-from rest_framework import generics, mixins, status, viewsets
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView, CreateAPIView
@@ -9,19 +9,29 @@ from drf_spectacular.utils import extend_schema
 
 from .models import Group, Like, Tag, UserGroup
 from .serializers import GroupSerializer, LikeSerializer, TagSerializer, UserGroupSerializer, TagBatchSerializer
+from .helpers import send_invitation_message
 
-# TODO: add default tag when create
-# TODO: filter group by user id
 class GroupList(ListCreateAPIView):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
 
+    def get_queryset(self):
+        groups = UserGroup.objects.filter(user_id=self.request.user.id).values_list('group_id', flat=True)
+        return Group.objects.filter(id__in=groups)
+
     def perform_create(self, serializer):
+        default_tags_models = Tag.objects.all().filter(id__in=[1, 2, 3])
+        default_tags_json = TagSerializer(default_tags_models, many=True).data
+        for d in default_tags_json:
+            del d['id']
+
+        final_tags_json = self.request.data['tags']
+        final_tags_json.extend(default_tags_json)
+        self.request.data['tags'] = final_tags_json
         serializer.save(admin_user_id=self.request.user.id)
         group = Group.objects.get(pk=serializer.data['id'])
         UserGroup.objects.create(user_id=self.request.user.id, group=group, admin_approved=True, user_approved=True)
     
-# TODO: on cascade delete not working
 
 class GroupDetail(RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -96,13 +106,21 @@ class GroupUserDetail(RetrieveUpdateDestroyAPIView, CreateAPIView):
 
     # invite user into group
     def post(self, request, gid, uid):
-        if not UserGroup.objects.filter(user_id=uid, group_id=gid).exists():
-            user_group = UserGroup(user_id=uid, group_id=gid)
+        self_uid = request.user.id
+        from_user_group = UserGroup.objects.filter(user_id=self_uid, group_id=gid)
+        to_user_group = UserGroup.objects.filter(user_id=uid, group_id=gid)
+        if from_user_group.exists() and not to_user_group.exists():
+            to_user_group = UserGroup(user_id=uid, group_id=gid)
             group = Group.objects.get(pk=gid)
             if group.allow_without_approval:
-                user_group.admin_approved = True
-            user_group.save()
-        return Response(status=status.HTTP_200_OK)
+                to_user_group.admin_approved = True
+            to_user_group.save()
+
+            send_invitation_message(group, self_uid, uid)
+        
+        to_user_group = get_object_or_404(UserGroup, user_id=uid, group_id=gid)
+        serializer = self.serializer_class(to_user_group)
+        return Response(status=status.HTTP_200_OK, data=serializer.data)
 
 
 class LikeDetail(APIView):

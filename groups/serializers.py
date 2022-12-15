@@ -1,9 +1,16 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Group, Tag, Like, UserGroup
 from drf_writable_nested.serializers import WritableNestedModelSerializer
-import io
 from rest_framework.parsers import JSONParser
+
+from .models import Group, Tag, Like, UserGroup
+
+import io
+import environ
+import requests
+
+env = environ.Env()
+environ.Env.read_env()
 
 READ_ONLY_FIELDS = ('id', 'created_at', 'updated_at')
 
@@ -49,17 +56,12 @@ class UserGroupSerializer(serializers.ModelSerializer):
 
     
     def get_user(self, obj):
-        user_json = '''
-        {
-            "id": 1,
-            "first_name": "test",
-            "last_name": "",
-            "email": ""
-        }'''
+        user_service = env('USER_SERVICE')
+        get_user_path = env('GET_USER_PATH')
+        user_url_base = f'{user_service}{get_user_path}/'
+        user_json = requests.get(f'{user_url_base}{obj.user_id}').json()['profile']
         
-        data = JSONParser().parse(io.BytesIO(user_json.encode()))
-        data['id'] = obj.user_id
-        return UserSerializer(data=data).initial_data
+        return UserSerializer(data=user_json).initial_data
     
 class LikeSerializer(serializers.ModelSerializer):
     class Meta:
