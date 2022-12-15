@@ -16,7 +16,7 @@ jobs:
       run: zip -r deploy.zip . -x '*.git*'
 
     - name: Save state
-      run: echo "CUR_TIMESTAMP=date +%Y%m%d%H%M%s" >> $GITHUB_ENV
+      run: echo "CUR_TIMESTAMP=`date +%Y%m%d%H%M%s`" >> $GITHUB_ENV
 
     - name: Deploy to EB
       uses: einaregilsson/beanstalk-deploy@v21
