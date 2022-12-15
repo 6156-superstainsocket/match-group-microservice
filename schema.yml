@@ -24,7 +24,6 @@ paths:
       - groups
       security:
       - jwtAuth: []
-      - {}
       responses:
         '200':
           content:
@@ -50,7 +49,6 @@ paths:
         required: true
       security:
       - jwtAuth: []
-      - {}
       responses:
         '201':
           content:
@@ -84,7 +82,6 @@ paths:
       - groups
       security:
       - jwtAuth: []
-      - {}
       responses:
         '200':
           content:
@@ -112,7 +109,6 @@ paths:
       - groups
       security:
       - jwtAuth: []
-      - {}
       responses:
         '200':
           content:
@@ -151,7 +147,6 @@ paths:
         required: true
       security:
       - jwtAuth: []
-      - {}
       responses:
         '201':
           content:
@@ -190,7 +185,6 @@ paths:
         required: true
       security:
       - jwtAuth: []
-      - {}
       responses:
         '200':
           content:
@@ -217,7 +211,6 @@ paths:
       - groups
       security:
       - jwtAuth: []
-      - {}
       responses:
         '204':
           description: No response body
@@ -359,12 +352,29 @@ paths:
       operationId: likes_update
       tags:
       - likes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TagBatch'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TagBatch'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TagBatch'
+        required: true
       security:
       - jwtAuth: []
-      - {}
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tag'
+          description: ''
   /api/tags/batch:
     post:
       operationId: tags_batch_create
@@ -384,7 +394,6 @@ paths:
         required: true
       security:
       - jwtAuth: []
-      - {}
       responses:
         '200':
           content:
@@ -408,11 +417,11 @@ components:
           maxLength: 100
         description:
           type: string
-          maxLength: 100
+          readOnly: true
         icon_id:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 31
+          minimum: 0
         allow_without_approval:
           type: boolean
         tags:
@@ -501,11 +510,11 @@ components:
           maxLength: 100
         description:
           type: string
-          maxLength: 100
+          readOnly: true
         icon_id:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 31
+          minimum: 0
         allow_without_approval:
           type: boolean
         tags:
@@ -530,8 +539,8 @@ components:
           maxLength: 100
         icon_id:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 23
+          minimum: 0
     Tag:
       type: object
       description: Adds nested create feature
@@ -547,8 +556,8 @@ components:
           maxLength: 100
         icon_id:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 23
+          minimum: 0
       required:
       - description
       - icon_id

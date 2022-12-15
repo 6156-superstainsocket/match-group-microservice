@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 class TimeInfo(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, blank=True)
@@ -11,7 +12,7 @@ class Group(TimeInfo):
     description = models.CharField(max_length=100)
     name = models.CharField(max_length=100)
     admin_user_id = models.IntegerField()
-    icon_id = models.IntegerField()
+    icon_id = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(31)])
     allow_without_approval = models.BooleanField(default=False)
 
     
@@ -19,7 +20,7 @@ class Tag(TimeInfo):
     name = models.CharField(max_length=100)
     group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='tags')
     description = models.CharField(max_length=100)
-    icon_id = models.IntegerField()
+    icon_id = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(23)])
 
 
 class Like(TimeInfo):
