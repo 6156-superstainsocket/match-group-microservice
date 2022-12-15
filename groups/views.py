@@ -101,7 +101,11 @@ class GroupUserDetail(RetrieveUpdateDestroyAPIView, CreateAPIView):
         matches = [id for id in likes if id in rev_likes]
 
         rsp_data = serializer.data
-        rsp_data['match_tag_ids'] = matches
+        tags = Tag.objects.all().filter(group_id=gid)
+        tags_json = TagSerializer(tags, many=True).data
+        for tag in tags_json:
+            tag['is_match'] = True if tag['id'] in matches else False
+        rsp_data['tags'] = tags_json
         return Response(rsp_data, status=status.HTTP_200_OK)
 
     # invite user into group
