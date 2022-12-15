@@ -80,7 +80,7 @@ class GroupUserDetail(RetrieveUpdateDestroyAPIView, CreateAPIView):
     # admin approve user & user accept invitation
     def update(self, request, gid, uid):
         args = {}
-        self_uid = request.headers['uid']
+        self_uid = request.user.id
         print(self_uid)
         group = Group.objects.get(pk=gid)
         if self_uid == uid:
@@ -91,7 +91,7 @@ class GroupUserDetail(RetrieveUpdateDestroyAPIView, CreateAPIView):
 
     # get user info in group
     def get(self, request, gid, uid):
-        self_uid = request.headers['uid']
+        self_uid = request.user.id
         user = get_object_or_404(UserGroup, user_id=uid, group_id=gid, admin_approved=True, user_approved=True)
         serializer = self.get_serializer(user)
         uid = user.id
@@ -124,6 +124,10 @@ class GroupUserDetail(RetrieveUpdateDestroyAPIView, CreateAPIView):
 
 
 class LikeDetail(APIView):
+    @extend_schema(
+        request=TagBatchSerializer,
+        responses=TagSerializer(many=True)
+    )
     def put(self, request):
         uid_from = request.data['fromUserId']
         uid_to = request.data['toUserId']
