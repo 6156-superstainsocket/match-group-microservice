@@ -38,6 +38,7 @@ class LikeSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = READ_ONLY_FIELDS
 
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
