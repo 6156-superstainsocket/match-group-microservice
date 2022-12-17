@@ -33,7 +33,7 @@
             "name": "date",
             "group": 0,
             "description": "I want to date with her/him/they",
-            "icon_id": 1
+            "icon_id": 2
         }
     },
     {
@@ -45,7 +45,7 @@
             "name": "study",
             "group": 0,
             "description": "I want to study with her/him/they",
-            "icon_id": 1
+            "icon_id": 3
         }
     }
 ]
