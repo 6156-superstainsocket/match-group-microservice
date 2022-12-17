@@ -22,7 +22,7 @@ GET_USER_PATH=<>
 ```
 
 ## prerequisite
-`python3.7`. Using a virtual enviroment is recommended.
+`python3.7`. Using a virtual environment is recommended.
 
 ## deploy & run
 
