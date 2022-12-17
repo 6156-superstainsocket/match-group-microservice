@@ -9,7 +9,7 @@ class TimeInfo(models.Model):
         abstract = True
 
 class Group(TimeInfo):
-    description = models.CharField(max_length=100)
+    description = models.CharField(max_length=100, blank=True, default="", editable=True)
     name = models.CharField(max_length=100)
     admin_user_id = models.IntegerField()
     icon_id = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(31)])
