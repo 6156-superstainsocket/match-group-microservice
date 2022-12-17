@@ -8,8 +8,8 @@ from rest_framework import permissions
 from drf_spectacular.utils import extend_schema
 
 from .models import Group, Like, Tag, UserGroup
-from .serializers import GroupSerializer, LikeSerializer, TagSerializer, UserGroupSerializer, TagBatchSerializer
-from .helpers import send_invitation_message, get_tags_json
+from .serializers import GroupSerializer, LikePutSerializer, TagSerializer, UserGroupSerializer, TagBatchSerializer, UserGroupBatchSerializer
+from .helpers import send_invitation_message, get_tags_json, get_users_by_emails
 
 class GroupList(ListCreateAPIView):
     queryset = Group.objects.all()
@@ -50,7 +50,7 @@ class GroupTagList(ListAPIView):
         return Tag.objects.all().filter(group=self.kwargs['pk'])
 
 
-class GroupUserList(ListAPIView):
+class GroupUserList(ListCreateAPIView):
     queryset = UserGroup.objects.all()
     serializer_class = UserGroupSerializer
 
@@ -66,15 +66,40 @@ class GroupUserList(ListAPIView):
         for item in items:
             item['tags'] = get_tags_json(request.user.id, item['user']['id'], item['group'])
         return rsp
+
+    # invite users into group
+    @extend_schema(
+        request=UserGroupBatchSerializer,
+        responses=None
+    )
+    def post(self, request, gid):
+        emails = request.data['emails']
+        users = get_users_by_emails(emails)
+        for user in users:
+            uid = user['id']
+            self_uid = request.user.id
+            from_user_group = UserGroup.objects.filter(user_id=self_uid, group_id=gid)
+            to_user_group = UserGroup.objects.filter(user_id=uid, group_id=gid)
+            if from_user_group.exists() and not to_user_group.exists():
+                to_user_group = UserGroup(user_id=uid, group_id=gid)
+                group = Group.objects.get(pk=gid)
+                if group.allow_without_approval:
+                    to_user_group.admin_approved = True
+                to_user_group.save()
+
+                send_invitation_message(group, self_uid, uid)
+            
+            to_user_group = get_object_or_404(UserGroup, user_id=uid, group_id=gid)
+            serializer = self.serializer_class(to_user_group)
+        return Response(status=status.HTTP_200_OK, data=serializer.data)
         
 
 # TODO: detele user from group permission check
 
-class GroupUserDetail(RetrieveUpdateDestroyAPIView, CreateAPIView):
+class GroupUserDetail(RetrieveUpdateDestroyAPIView):
     queryset = UserGroup.objects.all()
     serializer_class = UserGroupSerializer
     lookup_fields = ['uid', 'gid']
-    http_method_names = ['get', 'put', 'delete', 'post']
 
     def get_object(self):
         return get_object_or_404(UserGroup, user_id=self.kwargs['uid'], group_id=self.kwargs['gid'])
@@ -110,31 +135,11 @@ class GroupUserDetail(RetrieveUpdateDestroyAPIView, CreateAPIView):
         rsp_data['tags'] = tags_json
         return Response(rsp_data, status=status.HTTP_200_OK)
 
-    # invite user into group
-    # TODO: body contains all emails need to be invitations
-    def post(self, request, gid, uid):
-        self_uid = request.user.id
-        from_user_group = UserGroup.objects.filter(user_id=self_uid, group_id=gid)
-        to_user_group = UserGroup.objects.filter(user_id=uid, group_id=gid)
-        if from_user_group.exists() and not to_user_group.exists():
-            to_user_group = UserGroup(user_id=uid, group_id=gid)
-            group = Group.objects.get(pk=gid)
-            if group.allow_without_approval:
-                to_user_group.admin_approved = True
-            to_user_group.save()
-
-            send_invitation_message(group, self_uid, uid)
-        
-        to_user_group = get_object_or_404(UserGroup, user_id=uid, group_id=gid)
-        serializer = self.serializer_class(to_user_group)
-        return Response(status=status.HTTP_200_OK, data=serializer.data)
-
-
+   
 class LikeDetail(APIView):
-    # TODO: req schema
     @extend_schema(
-        request=TagBatchSerializer,
-        responses=TagSerializer(many=True)
+        request=LikePutSerializer,
+        responses=None
     )
     def put(self, request):
         uid_from = request.data['fromUserId']

@@ -74,3 +74,13 @@ class LikeSerializer(serializers.ModelSerializer):
         model = Like
         fields = '__all__'
         read_only_fields = READ_ONLY_FIELDS
+
+
+class UserGroupBatchSerializer(serializers.Serializer):
+    emails = serializers.ListField(child=serializers.CharField())
+
+class LikePutSerializer(serializers.Serializer):
+    uid_from = serializers.IntegerField()
+    uid_to = serializers.IntegerField()
+    tagIds = serializers.ListField(child=serializers.IntegerField())
+    groupId = serializers.IntegerField()
