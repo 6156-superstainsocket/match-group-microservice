@@ -26,7 +26,7 @@ class GroupList(ListCreateAPIView):
             del d['id']
 
         final_tags_json = self.request.data['tags']
-        final_tags_json.extend(default_tags_json)
+        final_tags_json = default_tags_json + final_tags_json
         self.request.data['tags'] = final_tags_json
         serializer.save(admin_user_id=self.request.user.id)
         group = Group.objects.get(pk=serializer.data['id'])
@@ -60,7 +60,9 @@ class GroupUserList(ListAPIView):
     def list(self, request, *args, **kwargs):
         rsp = super().list(request, *args, **kwargs)
         print(rsp.data)
-        items = rsp.data['results']
+        items = rsp.data['results'] if 'results' in rsp.data else rsp.data
+
+        print(items)
         for item in items:
             item['tags'] = get_tags_json(request.user.id, item['user']['id'], item['group'])
         return rsp
@@ -109,6 +111,7 @@ class GroupUserDetail(RetrieveUpdateDestroyAPIView, CreateAPIView):
         return Response(rsp_data, status=status.HTTP_200_OK)
 
     # invite user into group
+    # TODO: body contains all emails need to be invitations
     def post(self, request, gid, uid):
         self_uid = request.user.id
         from_user_group = UserGroup.objects.filter(user_id=self_uid, group_id=gid)
@@ -128,6 +131,7 @@ class GroupUserDetail(RetrieveUpdateDestroyAPIView, CreateAPIView):
 
 
 class LikeDetail(APIView):
+    # TODO: req schema
     @extend_schema(
         request=TagBatchSerializer,
         responses=TagSerializer(many=True)
