@@ -15,9 +15,14 @@ class GroupList(ListCreateAPIView):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
 
+    # TODO: how to gen docs for this?
     def get_queryset(self):
         groups = UserGroup.objects.filter(user_id=self.request.user.id).values_list('group_id', flat=True)
-        return Group.objects.filter(id__in=groups)
+        q_set = Group.objects.filter(id__in=groups)
+        ordering = self.request.query_params.get('order')
+        if ordering:
+            return q_set.order_by(ordering)
+        return q_set
 
     def perform_create(self, serializer):
         default_tags_models = Tag.objects.all().filter(id__in=[1, 2, 3])
