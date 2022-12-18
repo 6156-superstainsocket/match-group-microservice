@@ -75,6 +75,8 @@ class GroupUserList(ListCreateAPIView):
     def post(self, request, gid):
         emails = request.data['emails']
         users = get_users_by_emails(emails)
+
+        data = []
         for user in users:
             uid = user['id']
             self_uid = request.user.id
@@ -90,7 +92,8 @@ class GroupUserList(ListCreateAPIView):
                 send_invitation_message(group, self_uid, uid)
             
             to_user_group = get_object_or_404(UserGroup, user_id=uid, group_id=gid)
-            serializer = self.serializer_class(to_user_group)
+            data.append(to_user_group)
+        serializer = self.serializer_class(data, many=True)
         return Response(status=status.HTTP_200_OK, data=serializer.data)
         
 
