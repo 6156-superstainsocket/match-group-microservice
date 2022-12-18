@@ -117,12 +117,13 @@ class GroupUserDetail(RetrieveUpdateDestroyAPIView):
         self_uid = request.user.id
         group = Group.objects.get(pk=gid)
         user_group = get_object_or_404(UserGroup, user_id=uid, group_id=gid)
-        if self_uid == uid:
-            user_group.user_approved = True
-        elif self_uid == group.admin_user_id:
-            user_group.admin_approved = True
-        
+        if int(self_uid) == int(uid):
+            user_group.user_approved=True
+        elif int(self_uid) == int(group.admin_user_id):
+            user_group.admin_approved=True
+
         user_group.save()
+
         serializer = self.get_serializer(user_group)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
