@@ -147,20 +147,22 @@ class LikeDetail(APIView):
         request=LikePutSerializer,
         responses=None
     )
+    
     def put(self, request):
-        uid_from = request.data['fromUserId']
-        uid_to = request.data['toUserId']
+        req_data = LikePutSerializer(data=request.data)
+        uid_from = request.data['uid_from']
+        uid_to = request.data['uid_to']
         newTagIds = request.data['tagIds']
         groupId = request.data['groupId']
 
-        oldTagIds = Like.objects.filter(from_user_id=uid_from, to_user_id=uid_to, group_id=groupId).values_list('tag_id', flat=True)
+        oldTagIds = Like.objects.filter(user_id_from=uid_from, user_id_to=uid_to, group_id=groupId).values_list('tag_id', flat=True)
         createTagIds = list(set(newTagIds) - set(oldTagIds))
         deleteTagIds = list(set(oldTagIds) - set(newTagIds))
         for tagId in createTagIds:
-            like = Like(from_user_id=uid_from, to_user_id=uid_to, tag_id=tagId, group_id=groupId)
+            like = Like(user_id_from=uid_from, user_id_to=uid_to, tag_id=tagId, group_id=groupId)
             like.save()
         for tagId in deleteTagIds:
-            like = Like.objects.get(from_user_id=uid_from, to_user_id=uid_to, tag_id=tagId, group_id=groupId)
+            like = Like.objects.get(user_id_from=uid_from, user_id_to=uid_to, tag_id=tagId, group_id=groupId)
             like.delete()
         return Response(status=status.HTTP_200_OK)
 
