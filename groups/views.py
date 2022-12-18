@@ -114,15 +114,15 @@ class GroupUserDetail(RetrieveUpdateDestroyAPIView):
 
     # admin approve user & user accept invitation
     def update(self, request, gid, uid):
-        args = {}
         self_uid = request.user.id
-        print(self_uid)
         group = Group.objects.get(pk=gid)
+        user_group = get_object_or_404(UserGroup, user_id=uid, group_id=gid)
         if self_uid == uid:
-            args['user_approved'] = True
+            user_group.user_approved = True
         elif self_uid == group.admin_user_id:
-            args['admin_approved'] = True
-        super().update(request, args)
+            user_group.admin_approved = True
+        
+        user_group.save()
 
     # get user info in group
     def get(self, request, gid, uid):
