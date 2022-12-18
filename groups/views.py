@@ -123,6 +123,8 @@ class GroupUserDetail(RetrieveUpdateDestroyAPIView):
             user_group.admin_approved = True
         
         user_group.save()
+        serializer = self.get_serializer(user_group)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     # get user info in group
     def get(self, request, gid, uid):
