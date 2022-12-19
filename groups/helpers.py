@@ -6,6 +6,9 @@ import requests
 env = environ.Env()
 environ.Env.read_env()
 
+MESSAGE_TYPE_INVITATION = 2
+MESSAGE_TYPE_MANAGE = 3
+
 def get_users_by_emails(emails):
     data = {'uids': [], 'emails': emails}
     user_service = env('USER_SERVICE')
@@ -50,18 +53,11 @@ def send_invitation_message(group, user_from_id, user_to_id):
         'count': 1,
         'content': [
             {
-                'type': 2, # 2 for invitation
-                'userId': user_to['id'],
-                'userName': user_to['profile']['name'],
-                'userIconId': user_to['profile']['iconid'],
-                'groupId': group.id,
-                'groupName': group.name,
-                'groupIconId': group.icon_id,
-                'inviteByUserId': user_from['id'],
-                'inviteByUserName': user_from['profile']['name'],
-                'inviteByUserIconId': user_from['profile']['iconid'],
-                'hasRead': False,
-                'hasAccepted': False,
+                'from_user': user_from['profile'],
+                'to_user': user_to['profile'],
+                'type': MESSAGE_TYPE_INVITATION,
+                'uid': user_from['id'],
+                'email': user_from['email'],
             }
         ]
     }
