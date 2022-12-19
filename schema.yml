@@ -374,7 +374,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedTagList'
           description: ''
-  /api/likes/:
+  /api/likes:
     put:
       operationId: likes_update
       tags:
@@ -438,7 +438,6 @@ components:
           maxLength: 100
         description:
           type: string
-          readOnly: true
         icon_id:
           type: integer
           maximum: 31
@@ -452,13 +451,22 @@ components:
         admin_user_id:
           type: integer
           readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
       required:
       - admin_user_id
-      - description
+      - created_at
       - icon_id
       - id
       - name
       - tags
+      - updated_at
     LikePut:
       type: object
       properties:
@@ -549,7 +557,6 @@ components:
           maxLength: 100
         description:
           type: string
-          readOnly: true
         icon_id:
           type: integer
           maximum: 31
@@ -562,6 +569,14 @@ components:
             $ref: '#/components/schemas/PatchedTag'
         admin_user_id:
           type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
           readOnly: true
     PatchedTag:
       type: object
@@ -641,12 +656,12 @@ components:
     UserGroupBatch:
       type: object
       properties:
-        eamils:
+        emails:
           type: array
           items:
             type: string
       required:
-      - eamils
+      - emails
   securitySchemes:
     jwtAuth:
       type: http

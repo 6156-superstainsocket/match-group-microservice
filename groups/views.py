@@ -95,6 +95,7 @@ class GroupUserList(ListCreateAPIView):
                 to_user_group.save()
 
                 send_invitation_message(group, self_uid, uid)
+                
             
             to_user_group = get_object_or_404(UserGroup, user_id=uid, group_id=gid)
             data.append(to_user_group)
@@ -154,11 +155,14 @@ class LikeDetail(APIView):
     )
     
     def put(self, request):
-        req_data = LikePutSerializer(data=request.data)
-        uid_from = request.data['uid_from']
-        uid_to = request.data['uid_to']
-        newTagIds = request.data['tagIds']
-        groupId = request.data['groupId']
+        serializer = LikePutSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        req_data = serializer.validated_data
+        uid_from = req_data['uid_from']
+        uid_to = req_data['uid_to']
+        newTagIds = req_data['tagIds']
+        groupId = req_data['groupId']
 
         oldTagIds = Like.objects.filter(user_id_from=uid_from, user_id_to=uid_to, group_id=groupId).values_list('tag_id', flat=True)
         createTagIds = list(set(newTagIds) - set(oldTagIds))
