@@ -9,20 +9,11 @@ environ.Env.read_env()
 MESSAGE_TYPE_INVITATION = 2
 MESSAGE_TYPE_MANAGE = 3
 
-def get_users_by_emails(emails):
-    data = {'uids': [], 'emails': emails}
-    user_service = env('USER_SERVICE')
-    post_user_batch_path = env('POST_USER_BATCH_PATH')
-    url = f'{user_service}{post_user_batch_path}'
-
-    rsp = requests.post(url, json=data)
-    if rsp.status_code != 200:
-        print(f'[ERROR] get user ids by emails failed, emails: {emails}')
-        return []
-    else:
-        return rsp.json()['emails']
-
-
+USER_SERVICE = env('USER_SERVICE')
+MESSAGE_SERVICE = env('MESSAGE_SERVICE')
+POST_MESSAGE_PATH = env('POST_MESSAGE_PATH')
+GET_USER_PATH = env('GET_USER_PATH')
+POST_USER_BATCH_PATH = env('POST_USER_BATCH_PATH')
 
 
 def get_tags_json(user_from_id, user_to_id, gid):
@@ -38,18 +29,27 @@ def get_tags_json(user_from_id, user_to_id, gid):
 
 
 
+def get_users_by_emails(emails):
+    data = {'uids': [], 'emails': emails}
+    url = f'{USER_SERVICE}{POST_USER_BATCH_PATH}'
+
+    rsp = requests.post(url, json=data)
+    if rsp.status_code != 200:
+        print(f'[ERROR] get user ids by emails failed, emails: {emails}')
+        return []
+    else:
+        return rsp.json()['emails']
+
+
+
 def send_invitation_message(group, user_from_id, user_to_id):
-    user_service = env('USER_SERVICE')
-    get_user_path = env('GET_USER_PATH')
-    user_url_base = f'{user_service}{get_user_path}/'
+    user_url_base = f'{USER_SERVICE}{GET_USER_PATH}/'
     user_from = requests.get(f'{user_url_base}{user_from_id}').json()
     user_to = requests.get(f'{user_url_base}{user_to_id}').json()
+    
+    message_url = f'{MESSAGE_SERVICE}{POST_MESSAGE_PATH}'
 
-    message_serivce = env('MESSAGE_SERVICE')
-    post_message_path = env('POST_MESSAGE_PATH')
-    message_url = f'{message_serivce}{post_message_path}'
-
-    json_data = {
+    invitation_msg = {
         'count': 1,
         'content': [
             {
@@ -58,12 +58,39 @@ def send_invitation_message(group, user_from_id, user_to_id):
                 'type': MESSAGE_TYPE_INVITATION,
                 'uid': user_from['id'],
                 'email': user_from['email'],
+                'has_read': False,
             }
         ]
     }
 
-    rsp = requests.post(message_url, json=json_data)
+    send_request(message_url, 'POST', invitation_msg)
+
+    if group.allow_without_approval:
+        return
+    
+    admin_user = requests.get(f'{user_url_base}{group.admin_user_id}').json()
+    manage_msg = {
+        'count': 1,
+        'content': [
+            {
+                'from_user': user_from['profile'],
+                'to_user': user_to['profile'],
+                'type': MESSAGE_TYPE_MANAGE,
+                'uid': admin_user['id'],
+                'email': admin_user['email'],
+                'has_read': False,
+            }
+        ]
+    }
+    send_request(message_url, 'POST', manage_msg)
+
+    return
+
+
+def send_request(url, method, data=None):
+    rsp = requests.request(method, url, json=data)
     if rsp.status_code != 200:
-        print(f'[ERROR] send invitation from u:{user_from_id} to u:{user_to_id} on g:{group.id} message failed: {rsp.text}')
+        print(f'[ERROR] send {data} to {url} failed: {rsp.text}')
+        return None
     else:
-        print(f'[INFO] send invitation from u:{user_from_id} to u:{user_to_id} on g:{group.id} message success')
+        return rsp.json()
