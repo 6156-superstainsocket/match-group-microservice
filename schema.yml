@@ -374,6 +374,35 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedTagList'
           description: ''
+  /api/groups/batch:
+    post:
+      operationId: groups_batch_create
+      tags:
+      - groups
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupBatch'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/GroupBatch'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/GroupBatch'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Group'
+          description: ''
   /api/likes:
     put:
       operationId: likes_update
@@ -467,6 +496,15 @@ components:
       - name
       - tags
       - updated_at
+    GroupBatch:
+      type: object
+      properties:
+        ids:
+          type: array
+          items:
+            type: integer
+      required:
+      - ids
     LikePut:
       type: object
       properties:

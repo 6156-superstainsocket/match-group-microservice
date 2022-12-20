@@ -8,7 +8,7 @@ from rest_framework import permissions
 from drf_spectacular.utils import extend_schema
 
 from .models import Group, Like, Tag, UserGroup
-from .serializers import GroupSerializer, LikePutSerializer, TagSerializer, UserGroupSerializer, TagBatchSerializer, UserGroupBatchSerializer
+from .serializers import GroupSerializer, LikePutSerializer, TagSerializer, UserGroupSerializer, TagBatchSerializer, UserGroupBatchSerializer, GroupBatchSerializer
 from .helpers import send_invitation_message, get_tags_json, get_users_by_emails
 
 class GroupList(ListCreateAPIView):
@@ -46,6 +46,25 @@ class GroupDetail(RetrieveUpdateDestroyAPIView):
     def patch(self, request, pk):
         return self.partial_update(request, pk)
         
+
+class GroupBatch(APIView):
+    serializer_class = GroupSerializer
+    permission_classes = (permissions.AllowAny,)
+
+    @extend_schema(
+        request=GroupBatchSerializer,
+        responses=GroupSerializer(many=True)
+    )
+
+    def post(self, request):
+        req_serializer = GroupBatchSerializer(data=request.data)
+        if not req_serializer.is_valid():
+            return Response(req_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        ids = req_serializer.data['ids']
+        groups = Group.objects.filter(id__in=ids)
+        serializer = self.serializer_class(groups, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class GroupTagList(ListAPIView):
     permission_classes = [permissions.IsAuthenticated]

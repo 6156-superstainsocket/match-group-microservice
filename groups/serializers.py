@@ -23,6 +23,7 @@ class TagSerializer(WritableNestedModelSerializer):
 class TagBatchSerializer(serializers.Serializer):
     id = serializers.ListField(child=serializers.IntegerField())
 
+
 class GroupSerializer(WritableNestedModelSerializer):
     tags = TagSerializer(many=True, partial=True)
     description = serializers.CharField(required=False)
@@ -32,6 +33,10 @@ class GroupSerializer(WritableNestedModelSerializer):
         fields = ['id', 'name', 'description', 'icon_id', 'allow_without_approval', 'tags', 'admin_user_id', 'created_at', 'updated_at']
         read_only_fields = READ_ONLY_FIELDS + ('admin_user_id',)
     
+
+class GroupBatchSerializer(serializers.Serializer):
+    ids = serializers.ListField(child=serializers.IntegerField())
+
 
 class LikeSerializer(serializers.ModelSerializer):
     class Meta:
