@@ -50,17 +50,15 @@ def send_invitation_message(group, user_from_id, user_to_id):
     message_url = f'{MESSAGE_SERVICE}{POST_MESSAGE_PATH}'
 
     invitation_msg = {
-        'count': 1,
-        'content': [
-            {
-                'from_user': user_from['profile'],
-                'to_user': user_to['profile'],
-                'type': MESSAGE_TYPE_INVITATION,
-                'uid': user_from['id'],
-                'email': user_from['email'],
-                'has_read': False,
-            }
-        ]
+        'content': {
+            'from_user': user_from['profile'],
+            'to_user': user_to['profile'],
+            'group': group,
+        },
+        'type': MESSAGE_TYPE_INVITATION,
+        'uid': user_from['id'],
+        'email': user_from['email'],
+        'has_read': False,
     }
 
     send_request(message_url, 'POST', invitation_msg)
@@ -70,17 +68,15 @@ def send_invitation_message(group, user_from_id, user_to_id):
     
     admin_user = requests.get(f'{user_url_base}{group.admin_user_id}').json()
     manage_msg = {
-        'count': 1,
-        'content': [
-            {
-                'from_user': user_from['profile'],
-                'to_user': user_to['profile'],
-                'type': MESSAGE_TYPE_MANAGE,
-                'uid': admin_user['id'],
-                'email': admin_user['email'],
-                'has_read': False,
-            }
-        ]
+        'content': {
+            'from_user': user_from['profile'],
+            'to_user': user_to['profile'],
+            'group': group,
+        },
+        'type': MESSAGE_TYPE_MANAGE,
+        'uid': admin_user['id'],
+        'email': admin_user['email'],
+        'has_read': False,
     }
     send_request(message_url, 'POST', manage_msg)
 
