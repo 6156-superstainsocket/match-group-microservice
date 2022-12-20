@@ -195,6 +195,7 @@ class LikeDetail(APIView):
 
 class TagBatch(APIView):
     serializer_class = TagSerializer
+    permission_classes = (permissions.AllowAny)
 
     @extend_schema(
         request=TagBatchSerializer,
