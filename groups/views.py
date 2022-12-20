@@ -1,5 +1,7 @@
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from django.db import transaction
+
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -171,6 +173,7 @@ class LikeDetail(APIView):
         responses=None
     )
     
+    @transaction.atomic
     def put(self, request):
         serializer = LikePutSerializer(data=request.data)
         if not serializer.is_valid():
@@ -184,13 +187,20 @@ class LikeDetail(APIView):
         oldTagIds = Like.objects.filter(user_id_from=uid_from, user_id_to=uid_to, group_id=groupId).values_list('tag_id', flat=True)
         createTagIds = list(set(newTagIds) - set(oldTagIds))
         deleteTagIds = list(set(oldTagIds) - set(newTagIds))
+
+        can_not_delete_tag_ids = []
+
         for tagId in createTagIds:
             like = Like(user_id_from=uid_from, user_id_to=uid_to, tag_id=tagId, group_id=groupId)
             like.save()
         for tagId in deleteTagIds:
             like = Like.objects.get(user_id_from=uid_from, user_id_to=uid_to, tag_id=tagId, group_id=groupId)
-            like.delete()
-        return Response(status=status.HTTP_200_OK)
+            if like.processed: # can not unlike a matched tag
+                can_not_delete_tag_ids.append(tagId)
+            else:
+                like.delete()
+        
+        return Response(status=status.HTTP_200_OK, data={'can_not_delete_tag_ids': can_not_delete_tag_ids})
 
 
 class TagBatch(APIView):
