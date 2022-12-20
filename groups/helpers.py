@@ -56,6 +56,7 @@ def send_invitation_message(group, user_from_id, user_to_id):
             'from_user': user_from['profile'],
             'to_user': user_to['profile'],
             'group': GroupSerializer(group).data,
+            'has_accept': False,
         },
         'type': MESSAGE_TYPE_INVITATION,
         'uid': user_from['id'],
