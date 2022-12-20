@@ -64,12 +64,10 @@ class GroupUserList(ListCreateAPIView):
     
     def list(self, request, *args, **kwargs):
         rsp = super().list(request, *args, **kwargs)
-        print(rsp.data)
         items = rsp.data['results'] if 'results' in rsp.data else rsp.data
 
-        print(items)
         for item in items:
-            item['tags'] = get_tags_json(request.user.id, item['user']['id'], item['group'])
+            item['tags'] = get_tags_json(request.user.id, item['user']['user'], item['group'])
         return rsp
 
     # invite users into group

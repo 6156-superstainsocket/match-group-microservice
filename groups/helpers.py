@@ -17,11 +17,13 @@ POST_USER_BATCH_PATH = env('POST_USER_BATCH_PATH')
 
 
 def get_tags_json(user_from_id, user_to_id, gid):
-    likes_tags = Like.objects.all().filter(user_id_from=user_from_id, user_id_to=user_to_id, group_id=gid)
-    likes_tags_ids = likes_tags.values_list('tag_id', flat=True)
-    rev_likes_tags_ids = Like.objects.all().filter(user_id_from=user_to_id, user_id_to=user_from_id, group_id=gid).values_list('tag_id', flat=True)
-    matches_tags_ids = [id for id in likes_tags_ids if id in rev_likes_tags_ids]
+    likes = Like.objects.all().filter(user_id_from=user_from_id, user_id_to=user_to_id, group_id=gid)
+    likes_tags_ids = likes.values_list('tag_id', flat=True)
+    matches_tags_ids = [id for like in likes if like.processed]
+    # rev_likes_tags_ids = Like.objects.all().filter(user_id_from=user_to_id, user_id_to=user_from_id, group_id=gid).values_list('tag_id', flat=True)
+    # matches_tags_ids = [id for id in likes_tags_ids if id in rev_likes_tags_ids]
 
+    likes_tags = Tag.objects.all().filter(id__in=likes_tags_ids)
     tags_json = TagSerializer(likes_tags, many=True).data
     for tag in tags_json:
         tag['is_match'] = True if tag['id'] in matches_tags_ids else False
