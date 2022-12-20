@@ -1,5 +1,5 @@
 from .models import Like, Tag
-from .serializers import TagSerializer
+from .serializers import TagSerializer, GroupSerializer
 import environ
 import requests
 
@@ -55,14 +55,13 @@ def send_invitation_message(group, user_from_id, user_to_id):
         'content': {
             'from_user': user_from['profile'],
             'to_user': user_to['profile'],
-            'group': group,
+            'group': GroupSerializer(group).data,
         },
         'type': MESSAGE_TYPE_INVITATION,
         'uid': user_from['id'],
         'email': user_from['email'],
         'has_read': False,
     }
-
     send_request(message_url, 'POST', invitation_msg)
 
     if group.allow_without_approval:
