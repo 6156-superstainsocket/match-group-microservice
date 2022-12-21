@@ -65,7 +65,7 @@ def send_invitation_message(group, user_from_id, user_to_id):
     }
     send_request(message_url, 'POST', invitation_msg)
 
-    if group.allow_without_approval:
+    if group.allow_without_approval or group.admin_user_id == user_from_id:
         return
     
     admin_user = requests.get(f'{user_url_base}{group.admin_user_id}').json()
@@ -73,7 +73,7 @@ def send_invitation_message(group, user_from_id, user_to_id):
         'content': {
             'from_user': user_from['profile'],
             'to_user': user_to['profile'],
-            'group': group,
+            'group': GroupSerializer(group).data,
         },
         'type': MESSAGE_TYPE_MANAGE,
         'uid': admin_user['id'],
