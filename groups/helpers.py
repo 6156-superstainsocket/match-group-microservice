@@ -2,6 +2,7 @@ from .models import Like, Tag
 from .serializers import TagSerializer, GroupSerializer
 import environ
 import requests
+import logging
 
 env = environ.Env()
 environ.Env.read_env()
@@ -38,7 +39,7 @@ def get_users_by_emails(emails):
 
     rsp = requests.post(url, json=data)
     if rsp.status_code != 200:
-        print(f'[ERROR] get user ids by emails failed, emails: {emails}')
+        logging.error(f'get user ids by emails failed, emails: {emails}')
         return []
     else:
         return rsp.json()['emails']
@@ -89,7 +90,8 @@ def send_invitation_message(group, user_from_id, user_to_id):
 def send_request(url, method, data=None):
     rsp = requests.request(method, url, json=data)
     if rsp.status_code != 200:
-        print(f'[ERROR] send {data} to {url} failed: {rsp.text}')
+        logging.error(f' send {data} to {url} failed: {rsp.text}')
         return None
     else:
+        logging.info(f' send {data} to {url} success')
         return rsp.json()
