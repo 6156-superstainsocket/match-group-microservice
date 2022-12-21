@@ -60,8 +60,8 @@ def send_invitation_message(group, user_from_id, user_to_id):
             'has_accept': False,
         },
         'type': MESSAGE_TYPE_INVITATION,
-        'uid': user_from['id'],
-        'email': user_from['email'],
+        'uid': user_to['id'],
+        'email': user_to['email'],
         'has_read': False,
     }
     send_request(message_url, 'POST', invitation_msg)
