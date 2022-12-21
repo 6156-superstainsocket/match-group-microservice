@@ -109,7 +109,7 @@ class GroupUserList(ListCreateAPIView):
             if from_user_group.exists() and not to_user_group.exists():
                 to_user_group = UserGroup(user_id=uid, group_id=gid)
                 group = Group.objects.get(pk=gid)
-                if group.allow_without_approval:
+                if group.allow_without_approval or self_uid == group.admin_user_id:
                     to_user_group.admin_approved = True
                 to_user_group.save()
 
