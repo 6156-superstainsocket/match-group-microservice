@@ -32,7 +32,7 @@ class GroupSerializer(WritableNestedModelSerializer):
         model = Group
         fields = ['id', 'name', 'description', 'icon_id', 'allow_without_approval', 'tags', 'admin_user_id', 'created_at', 'updated_at']
         read_only_fields = READ_ONLY_FIELDS + ('admin_user_id',)
-    
+        optional_fields = ['description', ]
 
 class GroupBatchSerializer(serializers.Serializer):
     ids = serializers.ListField(child=serializers.IntegerField())
