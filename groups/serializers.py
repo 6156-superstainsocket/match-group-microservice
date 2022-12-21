@@ -26,7 +26,7 @@ class TagBatchSerializer(serializers.Serializer):
 
 class GroupSerializer(WritableNestedModelSerializer):
     tags = TagSerializer(many=True, partial=True)
-    description = serializers.CharField(required=False)
+    # description = serializers.CharField(required=False, allow_blank=True, allow_null=True)
    
     class Meta:
         model = Group
