@@ -19,7 +19,7 @@ class GroupList(ListCreateAPIView):
 
     # TODO: how to gen docs for this?
     def get_queryset(self):
-        groups = UserGroup.objects.filter(user_id=self.request.user.id).values_list('group_id', flat=True)
+        groups = UserGroup.objects.filter(user_id=self.request.user.id, user_approved=True, admin_approved=True).values_list('group_id', flat=True)
         q_set = Group.objects.filter(id__in=groups)
         ordering = self.request.query_params.get('order')
         if ordering:
