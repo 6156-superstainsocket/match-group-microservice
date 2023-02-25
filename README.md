@@ -29,6 +29,7 @@ POST_USER_BATCH_PATH=<>
 
 ### AWS Elastic Beanstalk
 For details see [action config](.github/workflows/aws-eb-django.yml).
+AWS credentials need to be set in the repo settings.
 
 ### local
 ```
