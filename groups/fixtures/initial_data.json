@@ -1,7 +1,7 @@
 [
     {
         "model": "groups.group",
-        "pk": 0,
+        "pk": 1,
         "fields": {
             "created_at": "2022-12-06T00:05:42.219Z",
             "updated_at": "2022-12-06T01:25:18.427Z",
@@ -19,7 +19,7 @@
             "created_at": "2022-12-11T05:59:36.953Z",
             "updated_at": "2022-12-11T05:59:36.953Z",
             "name": "dinner",
-            "group": 0,
+            "group": 1,
             "description": "I want to have dinner with her/him/they",
             "icon_id": 1
         }
@@ -31,7 +31,7 @@
             "created_at": "2022-12-11T05:59:36.953Z",
             "updated_at": "2022-12-11T05:59:36.953Z",
             "name": "date",
-            "group": 0,
+            "group": 1,
             "description": "I want to date with her/him/they",
             "icon_id": 2
         }
@@ -43,7 +43,7 @@
             "created_at": "2022-12-11T05:59:36.953Z",
             "updated_at": "2022-12-11T05:59:36.953Z",
             "name": "study",
-            "group": 0,
+            "group": 1,
             "description": "I want to study with her/him/they",
             "icon_id": 3
         }
